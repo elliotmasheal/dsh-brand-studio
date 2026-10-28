@@ -1,0 +1,24 @@
+Brand Studio for DeepSeek Harness
+=================================
+
+This is an unofficial, community-built plugin. It is not affiliated with,
+endorsed by, or sponsored by DeepSeek.
+
+Trademarks
+----------
+"DeepSeek", "DeepSeek Harness", the DeepSeek whale mark and the "HARNESS" badge
+are trademarks or registered trademarks of their respective owner. Their use
+here is nominative only: the plugin shows them by leaving DeepSeek Harness's own
+brand occupants in place, never by shipping the logo as its own asset.
+
+Third-party artwork
+-------------------
+`client.js` contains the glyph geometry of the official "HARNESS" badge
+(`HARNESS_GLYPHS`), extracted from the wordmark SVG that ships inside the
+DeepSeek Harness desktop application. It is reproduced only so that a custom
+brand name can be followed by a badge that matches the official artwork exactly.
+
+That geometry remains the property of its owner and is **not** covered by this
+project's MIT license. The MIT license applies to the rest of the plugin code.
+If you fork this project and do not need that fidelity, delete `HARNESS_GLYPHS`
+and the `HarnessBadge` component together with the Harness settings row.

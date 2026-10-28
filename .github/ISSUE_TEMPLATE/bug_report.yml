@@ -1,0 +1,79 @@
+name: 🐛 Bug 报告
+description: 反馈插件异常：显示不对、设置不生效、加载失败等
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。提交前请先确认：插件是否真的启用（设置 → 通用里能看到 5 行品牌设置），以及是否刷新过页面。
+
+  - type: input
+    id: dsh-version
+    attributes:
+      label: DSH 版本
+      description: 设置 → 通用 → 当前版本，或 `dsh --version`
+      placeholder: 0.2.1-rc.3
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: 插件版本
+      description: 设置 → 插件 里 `dsh-brand-studio` 显示的版本
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 运行环境
+      options:
+        - Windows 桌面端
+        - macOS 桌面端
+        - 浏览器 Web UI
+        - 其它 / 不确定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及哪部分
+      options:
+        - Logo（来源 / 形状 / 上传）
+        - 品牌名称
+        - Harness 徽标
+        - 设置行不显示 / 点不动
+        - 安装或加载失败
+        - 其它
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 现象与期望
+      description: 实际看到什么，你以为应该是什么
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 设置 → 通用
+        2. Logo 来源选「上传的图片」
+        3. ……
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: 控制台报错（可选）
+      description: 开发者工具 Console 中与品牌插件相关的报错
+      render: shell

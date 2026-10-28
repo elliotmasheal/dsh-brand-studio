@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 安装与使用说明
+    url: https://github.com/elliotmasheal/dsh-brand-studio#安装
+    about: 先看 README 的安装步骤与环境要求
+  - name: 常见限制
+    url: https://github.com/elliotmasheal/dsh-brand-studio#已知限制
+    about: 有些行为受 DSH 槽位模型限制，属于设计取舍

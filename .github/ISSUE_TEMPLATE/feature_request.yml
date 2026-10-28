@@ -1,0 +1,44 @@
+name: ✨ 功能建议
+description: 想要新的能力或更好的默认行为
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        建议前请先看一眼 README 的「已知限制」：有些能力受 DSH 槽位模型限制，不是本插件能决定的。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题
+      description: 描述场景，而不是直接给方案
+      placeholder: 我在多台设备间切换，希望品牌设置能跟着账号同步……
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你期望的做法
+      description: 如果有具体交互或选项名，写在这里
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及哪部分
+      options:
+        - Logo（来源 / 形状 / 上传）
+        - 品牌名称
+        - Harness 徽标
+        - 设置页位置 / 布局
+        - 安装体验
+        - 其它
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: 已知约束确认
+      options:
+        - label: 我理解本插件只通过 DSH 槽位实现，不修改其它插件的 DOM
+          required: true

@@ -1,0 +1,59 @@
+{
+  "name": "dsh-brand-studio",
+  "version": "0.1.0",
+  "description": "DSH 侧边栏品牌插件：用已登录账号头像或上传图片替换品牌标志，支持纯圆/圆角矩形、自定义名称与官方 Harness 徽标开关。",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "branding",
+    "sidebar",
+    "avatar",
+    "customization"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "有彭",
+    "url": "https://github.com/elliotmasheal"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elliotmasheal/dsh-brand-studio.git"
+  },
+  "homepage": "https://github.com/elliotmasheal/dsh-brand-studio#readme",
+  "bugs": {
+    "url": "https://github.com/elliotmasheal/dsh-brand-studio/issues"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.en.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-settings-general"
+      ]
+    }
+  }
+}
