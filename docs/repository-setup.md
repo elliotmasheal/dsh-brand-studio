@@ -54,5 +54,5 @@ git push gitee main --tags
 - **About 的 Releases / Packages** 不用额外配置，打 tag 后自动出现。
 - **Social preview**（分享卡片）：仓库 Settings → Social preview，上传 1280×640 的图，
   可用侧边栏截图 + 标题文字拼一张。
-- **分支保护**：单人项目可跳过；若开放 PR，建议要求 CI 通过再合并。
+- **分支保护**：单人项目可以跳过；开放 PR 后再按需要加。
 - **Discussions**：Issue 模板里没有引用它，暂不开启也不影响。

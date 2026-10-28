@@ -1,123 +1,71 @@
-# Brand Studio · DSH 侧边栏品牌
+# Brand Studio
 
-[![CI](https://github.com/elliotmasheal/dsh-brand-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/elliotmasheal/dsh-brand-studio/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![DSH](https://img.shields.io/badge/DSH-0.2.1--rc.3-4D6BFE)](https://github.com/deepseek-ai/deepseek-harness)
+![侧边栏效果](docs/sidebar.png)
 
-给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（下称 DSH）用的
-**非官方社区插件**：把侧边栏左上角的品牌标志与名称换成你自己的，并把设置项直接混进
-「设置 → 通用」页，**不新增左侧菜单**。
+一个小插件，用来把 DeepSeek Harness 侧边栏左上角的品牌区换成自己的：头像、名字，以及要不要留官方那个 HARNESS 小徽标。
 
-> English: [README.en.md](README.en.md)
+官方的鱼和「DeepSeek Harness」是一整张字标图，用久了总觉得跟自己没什么关系，就写了这个。除了左上角这一块，其它地方一律没动；设置也没有单独占一个菜单，而是并进了「设置 → 通用设置」页。
 
-## 功能
+## 能改什么
 
-| 能力 | 选项 | 效果 |
-| --- | --- | --- |
-| Logo 来源 | 已登录账号头像 / 上传的图片 / 官方标志 | 决定左上角显示哪张图，展开态与收起后的图标条同时生效 |
-| Logo 形状 | 纯圆 / 圆角矩形 | 纯圆会额外写 `corner-shape: round`，否则会被主题的超椭圆规则拉成圆角方 |
-| 品牌名称 | 自由文本（≤ 24 字） | 留空即使用官方字标 DeepSeek Harness |
-| Harness 徽标 | 开 / 关，仅自定义名称可用 | 在自定义名称后追加官方的 Harness 药丸徽标 |
+- **头像**：当前登录的 DeepSeek 账号头像、自己上传一张图，或者继续用官方标志。
+- **形状**：纯圆 / 圆角矩形。
+- **名字**：想叫什么就叫什么，留空就用官方的 DeepSeek Harness。
+- **Harness 徽标**：只有自定义名字时可选，决定名字后面要不要跟官方的 HARNESS 徽标。
 
-几条行为规则：
+![设置项](docs/settings.png)
 
-- **官方名称时 Harness 固定显示**：官方字标是一整张图（DeepSeek + Harness），不拆开，
-  所以名称留空时徽标开关被锁定，官方 logo 不会被改坏。
-- **账号头像仅登录后可选**；未登录、账号无头像、未上传图片时都会回落到官方标志，
-  而不是留一个空格子。
-- **只有「上传的图片」来源才可更换/移除图片**，账号图片属于账号、官方标志属于构建，
-  都不允许在本插件里改动。
-- 选择「上传的图片」但还没存过图时，会自动弹出文件选择框。
+## 一些行为说明
 
-## 截图
+官方的字标是「DeepSeek」和「Harness」画在一起的一整张图，没法只取一半，所以名字留空时 Harness 开关是锁住的，官方 logo 原样显示。只有你自己填了名字，这个开关才有意义。
 
-待补充：本地跑起来后截图放到 `docs/screenshot.png`，再在 README 顶部引用即可。
+没登录、账号没设头像、选中「上传的图片」但还没传图——这几种情况都会退回官方标志，不会留一个空格子。
 
-## 环境要求
+图片只有「上传的图片」这一种来源可以改和删；账号头像跟着账号走、官方标志跟着版本走，这两样在这里都不允许动。
 
-- DSH **0.2.1-rc.3** 上下（开发与验证版本；槽位 API 若变更需同步调整）。
-- Web 版与桌面版（Windows / macOS）均可；Windows 标题栏的 1px 布局偏移已适配。
+配置存在浏览器本地（`dsh.custom-brand.v1`），换台机器要重新设一遍。上传的图会先居中裁成 192×192 再存，免得把 localStorage 撑爆。
 
 ## 安装
 
-本插件是 DSH 的 bundle（`dsh.bundle.patch` + 客户端半），按下面任一路径装到某个 profile：
+1. 侧边栏打开「插件」，点右上角「添加插件」。
+2. 在输入框里填仓库地址：`https://github.com/elliotmasheal/dsh-brand-studio`
+3. 装好后启用 `dsh-brand-studio`（如果它没自动启用），刷新页面。
+4. 打开 设置 → 通用设置，往下翻能看到五行品牌设置，就成了。
 
-1. **让 DSH 内的 agent 安装**（推荐）：把仓库克隆到本机，然后在会话里让它对仓库目录执行
-   bundle 安装（即插件管理器的 `install_bundle`，参数为仓库绝对路径）。
-2. **命令行**：先用 `dsh plugin` 把依赖装进 profile，再启用对应的 bundle：
+仓库如果还是私有的，安装的那台机器需要有访问权限；转公开之后直接填地址就行。
 
-   ```sh
-   dsh plugin --profile <profile> add /path/to/dshBrandStudio
-   ```
+卸载更简单：在插件列表里移除即可，左上角会马上恢复成官方样子——我并没有改官方的东西，只是临时占着它的槽位，撤掉就自动还回去了。
 
-装好后打开 设置 → 通用，向下滚动看到 5 行品牌设置即为成功。刷新页面生效。
+## 怎么实现的
 
-卸载：移除该 bundle（插件管理器 `remove_bundle`），品牌槽位会自动交还给官方占位。
+只占三个官方槽位：
 
-## 使用
+- `sidebar.brand.mark` / `sidebar.brand.name`：有东西可显示时才占（优先级 -1，压过官方占位），没东西就让位。
+- `settings.general.item`：五行设置，作为通用页的追加行，不新增页面。
 
-设置 → 通用 页里新增的 5 行（顺序 40–44，位于「性能与用量」之后）：
+账号头像走 `ctx.remote.account`：订阅登录状态，登录后调 `getProfile` 拿 `avatarUrl`，图片在浏览器里真的解码出来了才上屏，所以不会先闪一个空框。
 
-| 行 | 说明 |
-| --- | --- |
-| Logo 来源 | 三选一；未登录时账号头像项置灰 |
-| Logo 形状 | 纯圆 / 圆角矩形，作用于左上角标志与截图预览 |
-| Logo 图片 | 32px 预览 + 选择 / 移除；非「上传」来源时禁用 |
-| 品牌名称 | 输入即生效；「恢复官方」清空 |
-| Harness 徽标 | 官方名称时锁定为开 |
+界面只用主题 token，没引 Harness 的客户端包，深浅色都跟着走。
 
-配置保存在渲染进程的 `localStorage`（键 `dsh.custom-brand.v1`），上传图片会先居中裁成
-192×192 的 WebP 再存，避免占满配额。**仅本机有效，不跨设备同步。**
+## 已知问题
 
-## 实现说明
-
-- 只占用官方槽位，不改其它插件的 DOM：
-  - `sidebar.brand.mark` / `sidebar.brand.name`：有可显示的替换内容时才占位
-    （优先级 `-1` 覆盖官方占位），否则自动让位给官方鱼形标志与字标。
-  - `settings.general.item`：5 行设置，作为通用页的加法座位，不新增页面。
-- 账号头像走官方 Remote 通道：`ctx.remote.account.watch()` 订阅登录状态，
-  `getProfile({ version, locale, timezoneOffsetSeconds })` 读取 `avatarUrl`，
-  图片在浏览器里解码成功后才上屏。
-- Harness 徽标不是文字，而是按官方字标里的同一套几何（药丸底 + 反白字母）重绘的
-  inline SVG，颜色取主题 token，深浅色都一致。
-- 界面仅使用主题 token（`--dsw-alias-*`、`--dsw-radius-*`），不引入 Harness 客户端包。
-
-## 目录结构
-
-```
-dshBrandStudio/
-├─ client.js           浏览器半（品牌槽位 + 设置行），全部逻辑在这里
-├─ index.js            宿主半（空实现，占位）
-├─ cordis.patch.yml    bundle 补丁：插入 brand-studio 这一行
-├─ package.json        包清单（dsh.bundle / dsh.client）
-├─ locale/             插件卡片的中英文标题与描述
-├─ icon.svg            插件图标
-└─ .github/workflows/  CI：语法与 JSON 校验
-```
+- HARNESS 徽标的字形是从当前版本（0.2.1-rc.3）的字标里抠出来的，官方改版就得跟着改。
+- 设置存在本机，清理浏览器数据会丢。
+- 和别的同样改 `sidebar.brand.*` 的插件互斥。
+- Windows 标题栏那 1px 的布局偏移是单独适配过的，换平台可能要再看一眼。
 
 ## 开发
 
+改 `client.js`，保存就会热重载。至少跑一下语法检查：
+
 ```sh
 node --check client.js
-node --check index.js
 ```
 
-改完 `client.js` 保存即热重载，无需重启。更多约定见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+细节和约定写在 [CONTRIBUTING.md](CONTRIBUTING.md) 里。
 
-## 已知限制
+## 许可
 
-- Harness 徽标的几何是从当前版本 DSH 的字标里取的；官方改版后需要同步更新
-  `HARNESS_GLYPHS`。
-- 设置存在本机 `localStorage`，清理站点数据会丢失（可用「恢复官方」重置）。
-- 与其它同样占用 `sidebar.brand.*` 的插件互斥（都由优先级决定谁生效）。
-- 不能把设置嵌进「账号与余额」页：设置框架没有页内插槽，同 id 会替换整页。
+MIT，见 [LICENSE](LICENSE)。
 
-## 许可证
-
-[MIT](LICENSE)。商标与第三方图形说明见 [NOTICE](NOTICE)：
-DeepSeek / DeepSeek Harness 及相关标志归其所有者，本项目与 DeepSeek 无隶属关系；
-官方 Harness 徽标的字形几何仅用于像素级对齐，不在 MIT 授权范围内。
-
-## 更新记录
-
-见 [CHANGELOG.md](CHANGELOG.md)。
+这是社区插件，和 DeepSeek 官方没有关系。DeepSeek / DeepSeek Harness 及相关标志归其所有者；HARNESS 徽标的字形几何只用于对齐官方样式，不在 MIT 授权范围内，详见 [NOTICE](NOTICE)。
