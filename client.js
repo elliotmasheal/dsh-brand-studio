@@ -14,6 +14,8 @@ window.__ModuleLoader__.load({
     const DEFAULT_NAME = '有彭天地';
     const MAX_NAME = 24;
     const MAX_FILE_BYTES = 20 * 1024 * 1024;
+    /** Give the account picture this long to decode before the read counts as failed. */
+    const PROFILE_IMAGE_TIMEOUT_MS = 8000;
     /** Accepted `logoSource` values, in display order. */
     const SOURCES = ['account', 'upload', 'official'];
     /** Accepted `logoShape` values, in display order. */
@@ -93,13 +95,20 @@ window.__ModuleLoader__.load({
       return webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/png');
     };
 
-    /** Resolve once the browser knows whether it can paint the account picture. */
+    /** Resolve once the browser knows whether it can paint the account picture;
+     *  a stalled request settles as a failure instead of blocking the retry loop. */
     const preload = (url) =>
       new Promise((resolve) => {
         const image = new Image();
         image.referrerPolicy = 'no-referrer';
-        image.onload = () => resolve(true);
-        image.onerror = () => resolve(false);
+        let timer = 0;
+        const settle = (loaded) => {
+          window.clearTimeout(timer);
+          resolve(loaded);
+        };
+        timer = window.setTimeout(() => settle(false), PROFILE_IMAGE_TIMEOUT_MS);
+        image.onload = () => settle(true);
+        image.onerror = () => settle(false);
         image.src = url;
       });
 
@@ -661,22 +670,82 @@ window.__ModuleLoader__.load({
           timezoneOffsetSeconds: -new Date().getTimezoneOffset() * 60,
         });
 
-        let profileLoaded = false;
+        /** Attempts per burst; a later account frame, focus, or reconnect starts a new burst. */
+        const MAX_PROFILE_ATTEMPTS = 8;
+        /** One in-flight read, its retry schedule, and the credential it belongs to. */
+        let profilePending = false;
+        let profileAttempt = 0;
+        let profileRetryTimer = 0;
+        let profileEpoch = 0;
 
+        /** Cancel a queued retry. */
+        const stopProfileRetry = () => {
+          if (profileRetryTimer !== 0) {
+            window.clearTimeout(profileRetryTimer);
+            profileRetryTimer = 0;
+          }
+        };
+
+        /** Queue the next read after a failure, backing off to 30 s. */
+        const scheduleProfileRetry = () => {
+          if (!signedIn || profileRetryTimer !== 0 || profileAttempt >= MAX_PROFILE_ATTEMPTS) return;
+          const delay = Math.min(1200 * 2 ** profileAttempt, 30_000);
+          profileAttempt += 1;
+          profileRetryTimer = window.setTimeout(() => {
+            profileRetryTimer = 0;
+            loadProfile();
+          }, delay);
+        };
+
+        /** Read the signed-in account picture: an absent avatar settles, a failure retries. */
         const loadProfile = async () => {
-          if (!signedIn || profileLoaded) return;
-          profileLoaded = true;
+          if (!signedIn || profilePending) return;
+          const epoch = profileEpoch;
+          profilePending = true;
           try {
             const result = await ctx.remote.account.getProfile(client());
-            if (!result.ok || result.value?.status !== 'ready') return;
+            if (epoch !== profileEpoch || !signedIn) return;
+            if (!result.ok || result.value?.status !== 'ready') {
+              scheduleProfileRetry();
+              return;
+            }
             const url = result.value.value.avatarUrl;
-            if (typeof url !== 'string' || url === '') return;
-            if (!(await preload(url)) || !signedIn) return;
-            accountAvatar = url;
-            refresh();
+            if (typeof url !== 'string' || url === '') {
+              // The read settled: this account has no picture to show.
+              profileAttempt = 0;
+              stopProfileRetry();
+              if (accountAvatar !== '') {
+                accountAvatar = '';
+                refresh();
+              }
+              return;
+            }
+            const loaded = await preload(url);
+            if (epoch !== profileEpoch || !signedIn) return;
+            if (!loaded) {
+              scheduleProfileRetry();
+              return;
+            }
+            profileAttempt = 0;
+            stopProfileRetry();
+            if (accountAvatar !== url) {
+              accountAvatar = url;
+              refresh();
+            }
           } catch (_error) {
-            profileLoaded = false;
+            scheduleProfileRetry();
+          } finally {
+            profilePending = false;
+            if (signedIn && epoch !== profileEpoch) scheduleProfileRetry();
           }
+        };
+
+        /** Read again on a fresh chance to succeed: an account frame, refocus, or reconnect. */
+        const probeProfile = () => {
+          if (!signedIn) return;
+          profileAttempt = 0;
+          stopProfileRetry();
+          loadProfile();
         };
 
         const stream = ctx.remote.$stream({
@@ -694,12 +763,15 @@ window.__ModuleLoader__.load({
               if (next !== signedIn) {
                 signedIn = next;
                 if (!next) {
-                  profileLoaded = false;
+                  // Drop the previous credential's picture and any retry against it.
+                  profileEpoch += 1;
+                  profileAttempt = 0;
+                  stopProfileRetry();
                   accountAvatar = '';
                 }
                 refresh();
               }
-              if (next) loadProfile();
+              if (next) probeProfile();
             }
           } catch (_error) {
             // Keep the last known picture; the settings page shows the state.
@@ -712,12 +784,29 @@ window.__ModuleLoader__.load({
             if (result.ok && result.value?.status === 'credential-stored' && !signedIn) {
               signedIn = true;
               refresh();
-              loadProfile();
+              probeProfile();
             }
           } catch (_error) {
             // Signed out or offline: the official mark stays available.
           }
         })();
+
+        // A read that failed while the window was hidden or offline gets another
+        // burst as soon as the user is back, so the picture never stays missing.
+        ctx.effect(() => {
+          const retryWhenReachable = () => {
+            if (signedIn && accountAvatar === '') probeProfile();
+          };
+          const onVisibility = () => {
+            if (document.visibilityState === 'visible') retryWhenReachable();
+          };
+          document.addEventListener('visibilitychange', onVisibility);
+          window.addEventListener('online', retryWhenReachable);
+          return () => {
+            document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('online', retryWhenReachable);
+          };
+        }, 'brand studio: account picture recovery');
       },
     };
   },
